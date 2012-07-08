@@ -1,0 +1,13 @@
+Language:
+C++11
+
+Dependencies:
+OpenGL
+Glu
+Glut
+Glew
+GLM
+
+Build:
+clear && g++ -std=c++0x main.cpp MarchingCube.cpp ShaderProgram.cpp -o MarchingCube -I/home/rem/glm/glm-0.9.3.4/ -lglut -lGLU -lGLEW && ./MarchingCube 
+
