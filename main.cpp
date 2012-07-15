@@ -11,6 +11,7 @@
 #include "MarchingCube.h"
 
 #include <iostream>
+#include <chrono>
  
 GLuint vaoHandle;
 ShaderProgram* sprog;
@@ -42,9 +43,7 @@ void reshape (int w, int h)
 	if (h == 0) h = 1;
 	glViewport (0, 0, (GLsizei)w, (GLsizei)h);
 
-	float ratio = (1.0f * h) / (1.0f *  w);
 	projectionMatrix = glm::perspective(45.0f, (1.0f * w) / (1.0f * h), 0.1f, 100.0f);
-
 	glutPostRedisplay();
 }
 
@@ -68,7 +67,7 @@ void display()
 		1, GL_FALSE, glm::value_ptr(pmvMatrix));
 
 	// set shader lighting params
-	glm::vec3 lightDir(0.2f, 0.5f, 0.0f);
+	glm::vec3 lightDir(0.0f, 0.5f, 0.0f);
 	glUniform3fv(sprog->GetUniformLocation("LightDirection"), 1, glm::value_ptr(lightDir));
 
 	// draw
@@ -149,7 +148,13 @@ int main (int argc, char *argv[])
 	sprog->PrintAttrib();
 	sprog->PrintUniform();
 
+	// timings
+	std::chrono::time_point<std::chrono::system_clock> start, end;
+	int ellapsed_milliseconds;
+
 	// initialize marching cube
+	start = std::chrono::system_clock::now();
+	
 	float minValue = 1.8f;
 
 	float minX, maxX;
@@ -159,7 +164,7 @@ int main (int argc, char *argv[])
 	maxX = maxY = maxZ = 8.0f;
 
 	unsigned int nX, nY, nZ;
-	nX = nY = nZ = 20;
+	nX = nY = nZ = 100;
 
 	std::vector<glm::vec4> mcPoints((nX + 1) * (nY + 1) * (nZ + 1));
 	glm::vec3 mcStep((maxX - minX) / nX, (maxY - minY) / nY, (maxZ - minZ) / nZ);
@@ -177,13 +182,27 @@ int main (int argc, char *argv[])
 				mcPoints[x * (nY + 1) * (nZ + 1) + y * (nZ + 1) + z] = point;
 			}
 
+	end = std::chrono::system_clock::now();
+	ellapsed_milliseconds = 
+		std::chrono::duration_cast<std::chrono::milliseconds>
+			(end-start).count();
+	std::cout << "Initialization timer (ms) : " << ellapsed_milliseconds << std::endl;
+
 	// run marching cube
+	start = std::chrono::system_clock::now();
+
 	std::vector<Triangle> mcTriangles;
 
 	MarchingCube mc;
 	mc.SetMinValue(minValue);
 	mc.SetDimension(nX, nY, nZ);
 	mc.Process(mcPoints, mcTriangles);
+	
+	end = std::chrono::system_clock::now();
+	ellapsed_milliseconds = 
+		std::chrono::duration_cast<std::chrono::milliseconds>
+			(end-start).count();
+	std::cout << "Marching cube timer (ms) : " << ellapsed_milliseconds << std::endl;
 
 	triangleCount = mcTriangles.size();
 	std::cout << "Point count : " << mcPoints.size() << std::endl;
@@ -207,9 +226,9 @@ int main (int argc, char *argv[])
 			colorArray.push_back(color.y);
 			colorArray.push_back(color.z);
 
-			normalArray.push_back(t.normal.x);
-			normalArray.push_back(t.normal.y);
-			normalArray.push_back(t.normal.z);
+			normalArray.push_back(t.normal[i].x);
+			normalArray.push_back(t.normal[i].y);
+			normalArray.push_back(t.normal[i].z);
 		}
 	}
 
