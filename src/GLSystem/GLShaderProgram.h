@@ -6,15 +6,14 @@
 #include <vector>
 #include <string>
 
-class ShaderProgram
+class GLShaderProgram
 {
 public:
-	explicit ShaderProgram();
-	~ShaderProgram();
+	GLShaderProgram();
+	~GLShaderProgram();
 
-private:
-	explicit ShaderProgram(const ShaderProgram& rhs);
-	ShaderProgram& operator=(const ShaderProgram& rhs);
+	GLShaderProgram(const GLShaderProgram& rhs) = delete;
+	GLShaderProgram& operator=(const GLShaderProgram& rhs) =delete;
 
 public:
 	bool AddShaderFromFile(const GLenum type, const std::string& path, std::string& log);
@@ -23,6 +22,8 @@ public:
 
 	GLuint GetUniformLocation(const std::string& name);
 	
+	GLuint GetSubroutineIndex(const GLenum type, const std::string& name);
+
 	bool Link(std::string& log);
 
 	void Install();

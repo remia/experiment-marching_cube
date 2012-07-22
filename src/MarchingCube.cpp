@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+// linear interpolation between p1 and p2
 glm::vec3 intersection(glm::vec4 p1, glm::vec4 p2, float value)
 {
 	glm::vec3 inter;

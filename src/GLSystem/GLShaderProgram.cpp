@@ -1,22 +1,23 @@
-#include "ShaderProgram.h"
+#include <GL/glew.h>
+#include "GLShaderProgram.h"
 
 #include <sstream>
 #include <iostream>
 #include <fstream>
 
-ShaderProgram::ShaderProgram()
+GLShaderProgram::GLShaderProgram()
 {
 	_programHandle = glCreateProgram();
 }
 
-ShaderProgram::~ShaderProgram()
+GLShaderProgram::~GLShaderProgram()
 {
 	for(auto& handle : _shaderHandles)
 		glDeleteShader(handle);
 	glDeleteProgram(_programHandle);
 }
 
-bool ShaderProgram::AddShaderFromFile(const GLenum type,
+bool GLShaderProgram::AddShaderFromFile(const GLenum type,
 	const std::string& path, std::string& log)
 {
 	// create shader
@@ -66,17 +67,22 @@ bool ShaderProgram::AddShaderFromFile(const GLenum type,
 	return res == GL_TRUE;
 }
 
-void ShaderProgram::BindAttribLocation(const int location, const std::string& name)
+void GLShaderProgram::BindAttribLocation(const int location, const std::string& name)
 {
 	glBindAttribLocation(_programHandle, location, name.c_str());
 }
 
-GLuint ShaderProgram::GetUniformLocation(const std::string& name)
+GLuint GLShaderProgram::GetUniformLocation(const std::string& name)
 {
 	return glGetUniformLocation(_programHandle, name.c_str()); 
 }
 
-bool ShaderProgram::Link(std::string& log)
+GLuint GLShaderProgram::GetSubroutineIndex(const GLenum type, const std::string& name)
+{
+	return glGetSubroutineIndex(_programHandle, type, name.c_str());
+}
+
+bool GLShaderProgram::Link(std::string& log)
 {
 	for(auto& handle : _shaderHandles)
 		glAttachShader(_programHandle, handle);
@@ -105,12 +111,12 @@ bool ShaderProgram::Link(std::string& log)
 	return res == GL_TRUE;
 }
 
-void ShaderProgram::Install()
+void GLShaderProgram::Install()
 {
 	glUseProgram(_programHandle);
 }
 
-void ShaderProgram::PrintAttrib()
+void GLShaderProgram::PrintAttrib()
 {
 	GLint maxLength, nAttribs;
 	glGetProgramiv(_programHandle, GL_ACTIVE_ATTRIBUTES, &nAttribs);
@@ -135,7 +141,7 @@ void ShaderProgram::PrintAttrib()
 	delete [] name;
 }
 
-void ShaderProgram::PrintUniform()
+void GLShaderProgram::PrintUniform()
 {
 	GLint maxLength, nUniforms;
 	glGetProgramiv(_programHandle, GL_ACTIVE_UNIFORMS, &nUniforms);
