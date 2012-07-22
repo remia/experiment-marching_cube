@@ -7,9 +7,8 @@ public:
 	GLWindowBase() {}
 	virtual ~GLWindowBase() {}
 
-private:
-	GLWindowBase(const GLWindowBase& rhs);
-	GLWindowBase& operator=(const GLWindowBase& rhs);
+	GLWindowBase(const GLWindowBase& rhs) = delete;
+	GLWindowBase& operator=(const GLWindowBase& rhs) =delete;
 
 public:
 	// GL default events

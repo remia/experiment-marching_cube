@@ -21,10 +21,7 @@ GLWindowGlut::GLWindowGlut(int argc, char** argv)
 
 void GLWindowGlut::run()
 {
-	// Init GL
 	_init();
-
-	// Launch glutMainLoop
 	glutMainLoop();
 }
 

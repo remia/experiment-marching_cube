@@ -2,9 +2,9 @@
 
 #include "MyGLWindow.h"
 #include "MarchingCube.h"
+#include "Utils/Chrono.h"
 
 #include <iostream>
-#include <chrono>
 
 MyGLWindow::MyGLWindow()
 	: xRotate(0), yRotate(0), zRotate(0)
@@ -47,12 +47,10 @@ void MyGLWindow::initialize()
 	sprog.PrintUniform();
 
 	// timings
-	std::chrono::time_point<std::chrono::system_clock> start, end;
-	int ellapsed_milliseconds;
+	Chrono chrono;
+	chrono.start();
 
 	// initialize marching cube
-	start = std::chrono::system_clock::now();
-	
 	float minValue = 0; //1.8f;
 
 	float minX, maxX;
@@ -80,15 +78,10 @@ void MyGLWindow::initialize()
 				mcPoints[x * (nY + 1) * (nZ + 1) + y * (nZ + 1) + z] = point;
 			}
 
-	end = std::chrono::system_clock::now();
-	ellapsed_milliseconds = 
-		std::chrono::duration_cast<std::chrono::milliseconds>
-			(end-start).count();
-	std::cout << "Initialization timer (ms) : " << ellapsed_milliseconds << std::endl;
+	std::cout << "Initialization timer (ms) : " << chrono.ellapsed() << std::endl;
 
 	// run marching cube
-	start = std::chrono::system_clock::now();
-
+	chrono.start();
 	std::vector<Triangle> mcTriangles;
 
 	MarchingCube mc;
@@ -96,11 +89,7 @@ void MyGLWindow::initialize()
 	mc.SetDimension(nX, nY, nZ);
 	mc.Process(mcPoints, mcTriangles);
 	
-	end = std::chrono::system_clock::now();
-	ellapsed_milliseconds = 
-		std::chrono::duration_cast<std::chrono::milliseconds>
-			(end-start).count();
-	std::cout << "Marching cube timer (ms) : " << ellapsed_milliseconds << std::endl;
+	std::cout << "Marching cube timer (ms) : " << chrono.ellapsed() << std::endl;
 
 	triangleCount = mcTriangles.size();
 	std::cout << "Point count : " << mcPoints.size() << std::endl;

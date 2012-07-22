@@ -1,4 +1,3 @@
-#include <GL/glew.h>
 #include "GLShaderProgram.h"
 
 #include <sstream>

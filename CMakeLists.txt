@@ -11,6 +11,7 @@ set(source_files
 	src/main.cpp
 	src/MyGLWindow.cpp
 	src/MarchingCube.cpp
+	src/Utils/Chrono.cpp
 	src/GLSystem/GLContext.cpp
 	src/GLSystem/GLShaderProgram.cpp
 	src/GLSystem/Glut/GLWindowGlut.cpp
