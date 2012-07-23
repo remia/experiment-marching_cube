@@ -1,11 +1,8 @@
 #include <iostream>
 
-//#include "GLContext.h"
-//#include <GL/gl.h>
-
 template <typename T, typename WindowSystem>
 GLWindow<T, WindowSystem>::GLWindow(int argc, char** argv)
-    : WindowSystem(argc, argv)
+    : WindowSystem(argc, argv), T()
 {
 
 }

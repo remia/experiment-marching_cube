@@ -2,21 +2,19 @@
 
 GLWindowGlut* GlutWrapper::_glutWindow = 0;
 
-void GLWindowGlut::Init(int argc, char** argv)
+GLWindowGlut::GLWindowGlut(int argc, char** argv)
 {
+	GlutWrapper::_glutWindow = this;
+
 	glutInit (&argc, argv);
 
 	glutInitDisplayMode(GLUT_RGBA | GLUT_SINGLE | GLUT_DEPTH);
-	glutInitWindowSize(500, 500);
+	// glutCreateWindow seems to initialize opengl context,
+	// call before GLContext::LoadExtensions
 	glutCreateWindow("Glut window");
 	
 	GLContext::LoadExtensions();
 	std::cout << GLContext::Info() << std::endl;
-}
-
-GLWindowGlut::GLWindowGlut(int argc, char** argv)
-{
-	GlutWrapper::_glutWindow = this;
 }
 
 void GLWindowGlut::run()

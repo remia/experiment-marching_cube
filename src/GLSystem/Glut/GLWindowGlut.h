@@ -12,7 +12,6 @@ public:
 	GLWindowGlut(int argc, char** argv);
 
 public:
-	static void Init(int argc, char** argv);
 	template<typename WindowT>
 	void initWindow(WindowT& window, const unsigned int width, const unsigned int height);
 	void run();

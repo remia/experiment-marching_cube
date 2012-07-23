@@ -1,7 +1,11 @@
 #pragma once
 
+// Host class
+// note : inheritance order matters, WindowSystem must get a chance
+// to initialize OpenGL context before T constructor get called, because
+// it might call OpenGL function during construction
 template <typename T,typename WindowSystem>
-class GLWindow : public T, public WindowSystem
+class GLWindow : public WindowSystem, public T
 {
 public:
     	GLWindow(int argc, char** argv);

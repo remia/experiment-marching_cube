@@ -3,9 +3,7 @@ template<typename WindowT>
 void GLWindowGlut::initWindow(WindowT& window, const unsigned int width, const unsigned int height)
 {
 	// Init window
-	//glutInitDisplayMode(GLUT_RGBA | GLUT_SINGLE | GLUT_DEPTH);
-	//glutInitWindowSize(width, height);
-	//glutCreateWindow("Glut window");
+	glutReshapeWindow(width, height);
 
 	// Bind window function
 	using namespace std::placeholders;
