@@ -1,5 +1,3 @@
-//#include <GL/glew.h>
-
 #include "MyGLWindow.h"
 #include "MarchingCube.h"
 #include "Utils/Chrono.h"
@@ -91,16 +89,14 @@ void MyGLWindow::initialize()
 	
 	std::cout << "Marching cube timer (ms) : " << chrono.ellapsed() << std::endl;
 
-	triangleCount = mcTriangles.size();
+	unsigned int triangleCount = mcTriangles.size();
 	std::cout << "Point count : " << mcPoints.size() << std::endl;
 	std::cout << "Triangle count : " << triangleCount << std::endl;
 
 	// initialize data
 	std::vector<float> positionArray;
-	std::vector<float> colorArray;
 	std::vector<float> normalArray;
 
-	glm::vec3 color(1.0f, 1.0f, 0.0f);
 	for(auto t : mcTriangles)
 	{
 		for(int i = 0; i < 3; ++i)
@@ -109,79 +105,31 @@ void MyGLWindow::initialize()
 			positionArray.push_back(t.vertices[i].y);
 			positionArray.push_back(t.vertices[i].z);
 
-			colorArray.push_back(color.x);
-			colorArray.push_back(color.y);
-			colorArray.push_back(color.z);
-
 			normalArray.push_back(t.normal[i].x);
 			normalArray.push_back(t.normal[i].y);
 			normalArray.push_back(t.normal[i].z);
 		}
 	}
 
-	// debug, display 3 axis
-/*
-	positionArray = std::vector<float> {
-		 0.0f,  0.0f, 0.0f,
-		 2.0f,  0.0f, 0.0f,
-		 0.0f,  0.0f, 0.0f,
-		 0.0f,  2.0f, 0.0f,
-		 0.0f,  0.0f, 0.0f,
-		 0.0f,  0.0f, 2.0f };
+	// create 3D primitive
+	GLPrimitiveT mesh(new GLPrimitive3D);
+	mesh->SetBufferData(PositionLocation, positionArray, 3);
+	mesh->SetBufferData(NormalLocation, normalArray, 3);
+	mesh->SetPrimitiveType(GL_TRIANGLES);
+	mesh->SetVerticesCount(triangleCount * 3);
 
-	colorArray = std::vector<float> {
-		1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 1.0f };
-*/
+	_primitiveLibrary["MCMesh"] = mesh;
 
-	// init vbo
-	GLuint vboHandles[3];
-	glGenBuffers(3, vboHandles);
-	GLuint positionBufferHandle = vboHandles[0];
-	GLuint colorBufferHandle = vboHandles[1];
-	GLuint normalBufferHandle = vboHandles[2];
+	Entity3D e1;
+	e1.SetPrimitive(_primitiveLibrary, "MCMesh");
+	e1.SetPosition( glm::vec3(0.0f, 0.0f, -10.0f) );
 
-	// populate vbo
-	glBindBuffer(GL_ARRAY_BUFFER, positionBufferHandle);
-	glBufferData(GL_ARRAY_BUFFER, positionArray.size() * sizeof(float),
-		 positionArray.data(), GL_STATIC_DRAW);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, colorBufferHandle);
-	//glBufferData(GL_ARRAY_BUFFER, colorArray.size() * sizeof(float),
-	//	 colorArray.data(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, normalBufferHandle);
-	glBufferData(GL_ARRAY_BUFFER, normalArray.size() * sizeof(float),
-		 normalArray.data(), GL_STATIC_DRAW);
-
-	// init vao
-	glGenVertexArrays(1, &vaoHandle);
-	glBindVertexArray(vaoHandle);	
-
-	glEnableVertexAttribArray(PositionLocation);
-	//glEnableVertexAttribArray(ColorLocation);
-	glEnableVertexAttribArray(NormalLocation);
-
-	// map corresponding vbo to vao attribArray
-	glBindBuffer(GL_ARRAY_BUFFER, positionBufferHandle);
-	glVertexAttribPointer(PositionLocation, 3, GL_FLOAT, GL_FALSE, 0, (GLubyte*) NULL);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, colorBufferHandle);
-	//glVertexAttribPointer(ColorLocation, 3, GL_FLOAT, GL_FALSE, 0, (GLubyte*) NULL);
-
-	glBindBuffer(GL_ARRAY_BUFFER, normalBufferHandle);
-	glVertexAttribPointer(NormalLocation, 3, GL_FLOAT, GL_FALSE, 0, (GLubyte*) NULL);
-
-	GLenum errCode;
-	const GLubyte *errString;
-	if ((errCode = glGetError()) != GL_NO_ERROR) {
-		errString = gluErrorString(errCode);
-	   fprintf (stderr, "Initialize : OpenGL Error: %s\n", errString);
-	}
+	Entity3D e2;
+	e2.SetPrimitive(_primitiveLibrary, "MCMesh");
+	e2.SetPosition( glm::vec3(4.0f, 0.0f, -10.0f) );
+	
+	_actors.push_back(e1);
+	_actors.push_back(e2);
 }
 
 void MyGLWindow::resize(int width, int height)
@@ -198,82 +146,77 @@ void MyGLWindow::paint()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0, 0, 0, 0);
 
-	// set matrices model view proj
-	glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -10.0f));
-	modelMatrix = glm::rotate(modelMatrix, xRotate / 16.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-	modelMatrix = glm::rotate(modelMatrix, yRotate / 16.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	modelMatrix = glm::rotate(modelMatrix, zRotate / 16.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-
-	glm::mat4 viewMatrix = glm::lookAt(
-		glm::vec3(0.0f, 2.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, -10.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f));
-	
-	glm::mat4 modelViewMatrix = viewMatrix * modelMatrix;	
-	glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(modelViewMatrix));
-	glm::mat4 pmvMatrix = projectionMatrix * viewMatrix * modelMatrix;
-
-	glUniformMatrix4fv(sprog.GetUniformLocation("ProjectionMatrix"),
-		1, GL_FALSE, glm::value_ptr(projectionMatrix));
-	glUniformMatrix3fv(sprog.GetUniformLocation("NormalMatrix"),
-		1, GL_FALSE, glm::value_ptr(normalMatrix));
-	glUniformMatrix4fv(sprog.GetUniformLocation("ModelViewMatrix"),
-		1, GL_FALSE, glm::value_ptr(modelViewMatrix));
-	glUniformMatrix4fv(sprog.GetUniformLocation("MVP"),
-		1, GL_FALSE, glm::value_ptr(pmvMatrix));
-
-	// set shader lighting params
-	struct LightInfo
+	for(Entity3D e : _actors)
 	{
-		glm::vec4 Position;	// Light position in eye coords
-		glm::vec3 La;		// Ambient light intensity
-		glm::vec3 Ld;		// Diffuse light intensity
-		glm::vec3 Ls;		// Specular light intensity;
-	};
-	LightInfo Light;
-	Light.Position = glm::vec4(0.0f, 5.0f, 0.0f, 1.0f);
-	Light.La = glm::vec3(0.1f, 0.1f, 0.7f);
-	Light.Ld = glm::vec3(0.8f, 0.5f, 0.5f);
-	Light.Ls = glm::vec3(1.0f, 1.0f, 1.0f);
+		// set matrices model view proj
+		glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), e.Position());
+		modelMatrix = glm::rotate(modelMatrix, xRotate / 16.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+		modelMatrix = glm::rotate(modelMatrix, yRotate / 16.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = glm::rotate(modelMatrix, zRotate / 16.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
-	struct MaterialInfo
-	{
-		glm::vec3 Ka;			// Ambient reflectivity
-		glm::vec3 Kd;			// Diffuse reflectivity
-		glm::vec3 Ks;			// Specular reflectivity
-		float Shininess;	// Specular shininess factor
-	};
-	MaterialInfo Material;
-	Material.Ka = glm::vec3(0.1f, 0.1f, 0.7f);
-	Material.Kd = glm::vec3(0.2f, 0.2f, 0.2f);
-	Material.Ks = glm::vec3(1.0f, 1.0f, 1.0f);
-	Material.Shininess = 30.0f;
+		glm::mat4 viewMatrix = glm::lookAt(
+			glm::vec3(0.0f, 2.0f, 0.0f),
+			glm::vec3(2.0f, 0.0f, -10.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));
+		
+		glm::mat4 modelViewMatrix = viewMatrix * modelMatrix;	
+		glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(modelViewMatrix));
+		glm::mat4 pmvMatrix = projectionMatrix * viewMatrix * modelMatrix;
 
-	glUniform4fv(sprog.GetUniformLocation("Light.Position"), 1, glm::value_ptr(Light.Position));
-	glUniform3fv(sprog.GetUniformLocation("Light.La"), 1, glm::value_ptr(Light.La));
-	glUniform3fv(sprog.GetUniformLocation("Light.Ld"), 1, glm::value_ptr(Light.Ld));
-	glUniform3fv(sprog.GetUniformLocation("Light.Ls"), 1, glm::value_ptr(Light.Ls));
-	
-	glUniform3fv(sprog.GetUniformLocation("Material.Ka"), 1, glm::value_ptr(Material.Ka));
-	glUniform3fv(sprog.GetUniformLocation("Material.Kd"), 1, glm::value_ptr(Material.Kd));
-	glUniform3fv(sprog.GetUniformLocation("Material.Ks"), 1, glm::value_ptr(Material.Ks));
-	glUniform1f(sprog.GetUniformLocation("Material.Shininess"), Material.Shininess);
+		glUniformMatrix4fv(sprog.GetUniformLocation("ProjectionMatrix"),
+			1, GL_FALSE, glm::value_ptr(projectionMatrix));
+		glUniformMatrix3fv(sprog.GetUniformLocation("NormalMatrix"),
+			1, GL_FALSE, glm::value_ptr(normalMatrix));
+		glUniformMatrix4fv(sprog.GetUniformLocation("ModelViewMatrix"),
+			1, GL_FALSE, glm::value_ptr(modelViewMatrix));
+		glUniformMatrix4fv(sprog.GetUniformLocation("MVP"),
+			1, GL_FALSE, glm::value_ptr(pmvMatrix));
 
-	GLuint diffuseLocation = sprog.GetSubroutineIndex(GL_VERTEX_SHADER, "diffuseOnly"); // "phongShading");
-	glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &diffuseLocation);
+		// set shader lighting params
+		struct LightInfo
+		{
+			glm::vec4 Position;	// Light position in eye coords
+			glm::vec3 La;		// Ambient light intensity
+			glm::vec3 Ld;		// Diffuse light intensity
+			glm::vec3 Ls;		// Specular light intensity;
+		};
+		LightInfo Light;
+		Light.Position = glm::vec4(0.0f, 5.0f, 0.0f, 1.0f);
+		Light.La = glm::vec3(0.1f, 0.1f, 0.7f);
+		Light.Ld = glm::vec3(0.8f, 0.5f, 0.5f);
+		Light.Ls = glm::vec3(1.0f, 1.0f, 1.0f);
 
-	// draw
-	glBindVertexArray(vaoHandle);
-	glDrawArrays(GL_TRIANGLES, 0, triangleCount * 3);
-	//glDrawArrays(GL_LINES, 0, 3 * 3);
-	glFlush();
+		struct MaterialInfo
+		{
+			glm::vec3 Ka;			// Ambient reflectivity
+			glm::vec3 Kd;			// Diffuse reflectivity
+			glm::vec3 Ks;			// Specular reflectivity
+			float Shininess;	// Specular shininess factor
+		};
+		MaterialInfo Material;
+		Material.Ka = glm::vec3(0.1f, 0.1f, 0.7f);
+		Material.Kd = glm::vec3(0.2f, 0.2f, 0.2f);
+		Material.Ks = glm::vec3(1.0f, 1.0f, 1.0f);
+		Material.Shininess = 30.0f;
 
-	GLenum errCode;
-	const GLubyte *errString;
-	if ((errCode = glGetError()) != GL_NO_ERROR) {
-		errString = gluErrorString(errCode);
-	   fprintf (stderr, "Draw OpenGL Error: %s\n", errString);
+		glUniform4fv(sprog.GetUniformLocation("Light.Position"), 1, glm::value_ptr(Light.Position));
+		glUniform3fv(sprog.GetUniformLocation("Light.La"), 1, glm::value_ptr(Light.La));
+		glUniform3fv(sprog.GetUniformLocation("Light.Ld"), 1, glm::value_ptr(Light.Ld));
+		glUniform3fv(sprog.GetUniformLocation("Light.Ls"), 1, glm::value_ptr(Light.Ls));
+		
+		glUniform3fv(sprog.GetUniformLocation("Material.Ka"), 1, glm::value_ptr(Material.Ka));
+		glUniform3fv(sprog.GetUniformLocation("Material.Kd"), 1, glm::value_ptr(Material.Kd));
+		glUniform3fv(sprog.GetUniformLocation("Material.Ks"), 1, glm::value_ptr(Material.Ks));
+		glUniform1f(sprog.GetUniformLocation("Material.Shininess"), Material.Shininess);
+
+		GLuint diffuseLocation = sprog.GetSubroutineIndex(GL_VERTEX_SHADER, "diffuseOnly"); // "phongShading");
+		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &diffuseLocation);
+
+		// draw
+		e.Draw();
 	}
+
+	glFlush();
 }
 
 // no input abstraction implemented

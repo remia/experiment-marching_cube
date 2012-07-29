@@ -4,6 +4,9 @@ project(MarchingCube)
 
 set(CMAKE_CXX_FLAGS "-std=c++0x -g")
 
+set(SDL_BUILDING_LIBRARY true)
+Find_Package(SDL REQUIRED)
+
 include_directories(/home/rem/glm/glm-0.9.3.4/)
 link_directories()
 
@@ -14,7 +17,11 @@ set(source_files
 	src/Utils/Chrono.cpp
 	src/GLSystem/GLContext.cpp
 	src/GLSystem/GLShaderProgram.cpp
+	src/GLSystem/GLPrimitive3D.cpp
+	src/GLSystem/Entity3D.cpp
+	src/GLSystem/GLUtils.cpp
 	src/GLSystem/Glut/GLWindowGlut.cpp
+	src/GLSystem/SDL/GLWindowSDL.cpp
 )
 
 add_executable(
@@ -27,5 +34,7 @@ target_link_libraries(
 	glut
 	GLU
 	GLEW
+	${SDL_LIBRARY}
+	SDLmain
 )
 

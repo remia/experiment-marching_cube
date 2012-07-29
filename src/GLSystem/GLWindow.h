@@ -1,5 +1,9 @@
 #pragma once
 
+#include <type_traits>
+
+class GLWindowBase;
+
 // Host class
 // note : inheritance order matters, WindowSystem must get a chance
 // to initialize OpenGL context before T constructor get called, because
@@ -7,8 +11,11 @@
 template <typename T,typename WindowSystem>
 class GLWindow : public WindowSystem, public T
 {
+	static_assert(std::is_base_of<GLWindowBase,T>::value, 
+		"GLWindow : 1st template argument must be derived from base class GLWindow");
+
 public:
-    	GLWindow(int argc, char** argv);
+	GLWindow(int argc, char** argv);
 	~GLWindow();
 
 private:

@@ -1,4 +1,5 @@
 #include "GLSystem/Glut/GLWindowGlut.h"
+//#include "GLSystem/SDL/GLWindowSDL.h"
 //#include "GLSystem/Qt/GLWindowQt.hpp"
 
 #include "MyGLWindow.h"

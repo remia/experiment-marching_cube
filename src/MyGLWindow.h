@@ -2,6 +2,8 @@
 
 #include "GLSystem/GLWindowBase.h"
 #include "GLSystem/GLShaderProgram.h"
+#include "GLSystem/GLPrimitiveLibrary.h"
+#include "GLSystem/Entity3D.h"
 
 // enable vector.x, .xyz, ... accessing style
 #define GLM_SWIZZLE
@@ -10,6 +12,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/type_precision.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
+
+#include <vector>
 
 // Custom class : have to define initialize, resize & paint
 class MyGLWindow : public GLWindowBase
@@ -34,14 +38,14 @@ private:
 	float Potential(const float x, const float y, const float z);
 
 private:
-	int triangleCount;
-	GLuint vaoHandle;
-	
+	GLPrimitiveLibrary _primitiveLibrary;
+	std::vector<Entity3D> _actors;
+	GLShaderProgram sprog;
+
 	glm::i16vec2 lastMousePos;
 	float xRotate;
 	float yRotate;
 	float zRotate;
 
-	GLShaderProgram sprog;
 	glm::mat4 projectionMatrix;
 };
