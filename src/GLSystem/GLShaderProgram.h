@@ -20,6 +20,8 @@ public:
 
 	void BindAttribLocation(const int location, const std::string& name);
 
+	GLuint GetAttribLocation(const std::string& name);
+	
 	GLuint GetUniformLocation(const std::string& name);
 	
 	GLuint GetSubroutineIndex(const GLenum type, const std::string& name);

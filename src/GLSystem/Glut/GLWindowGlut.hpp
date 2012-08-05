@@ -14,6 +14,7 @@ void GLWindowGlut::initWindow(WindowT& window, const unsigned int width, const u
 
 	_mouseEvent = std::bind(&WindowT::mouseEvent, std::ref(window), _1, _2, _3, _4);
 	_mouseMove = std::bind(&WindowT::mouseMove, std::ref(window), _1, _2);
+	_keyboardEvent = std::bind(&WindowT::keyboardEvent, std::ref(window), _1, _2, _3);
 	
 	// Bind GLWindow function to GLUT events
 	glutReshapeFunc(GlutWrapper::resize);
@@ -21,5 +22,6 @@ void GLWindowGlut::initWindow(WindowT& window, const unsigned int width, const u
 
 	glutMouseFunc(GlutWrapper::mouseEvent);
 	glutMotionFunc(GlutWrapper::mouseMove);
+	glutKeyboardFunc(GlutWrapper::keyboardEvent);
 }
 

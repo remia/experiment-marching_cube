@@ -71,6 +71,11 @@ void GLShaderProgram::BindAttribLocation(const int location, const std::string& 
 	glBindAttribLocation(_programHandle, location, name.c_str());
 }
 
+GLuint GLShaderProgram::GetAttribLocation(const std::string& name)
+{
+	return glGetAttribLocation(_programHandle, name.c_str());
+}
+
 GLuint GLShaderProgram::GetUniformLocation(const std::string& name)
 {
 	return glGetUniformLocation(_programHandle, name.c_str()); 

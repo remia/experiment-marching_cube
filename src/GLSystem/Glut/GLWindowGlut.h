@@ -23,6 +23,7 @@ public:
 
 	void glutMouseEvent(int buttons, int state, int x, int y);
 	void glutMouseMove(int x, int y);
+	void glutKeyboardEvent(unsigned char keys, int x, int y);
 
 private:
 	std::function<void()> _init;
@@ -31,6 +32,7 @@ private:
 
 	std::function<void(int, int, int, int)> _mouseEvent;
 	std::function<void(int, int)> _mouseMove;
+	std::function<void(unsigned char, int, int)> _keyboardEvent;
 };
 
 class GlutWrapper
@@ -41,6 +43,7 @@ public:
 
 	static void mouseEvent(int buttons, int state, int x, int y) { _glutWindow->glutMouseEvent(buttons, state, x, y); }
 	static void mouseMove(int x, int y) { _glutWindow->glutMouseMove(x, y); }
+	static void keyboardEvent(unsigned char keys, int x, int y) { _glutWindow->glutKeyboardEvent(keys, x, y); }
 
 	static GLWindowGlut* _glutWindow;
 };

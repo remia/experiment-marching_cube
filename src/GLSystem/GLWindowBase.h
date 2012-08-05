@@ -19,5 +19,5 @@ public:
 	// Optional Input event
 	virtual void mouseEvent(int buttons, int state, int x, int y) {}
 	virtual void mouseMove(int x, int y) {}
-	virtual void keyboardEvent(int keys, int modifiers) {}
+	virtual void keyboardEvent(unsigned char keys, int x, int y) {}
 };

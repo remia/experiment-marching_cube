@@ -1,7 +1,5 @@
 #pragma once
 
-#include "GLPrimitiveLibrary.h"
-
 // enable vector.x, .xyz, ... accessing style
 #define GLM_SWIZZLE
 #include <glm/glm.hpp>
@@ -9,19 +7,18 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/type_precision.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
-#include <string>
-
-class Entity3D
+class GLCamera
 {
 public:
-	Entity3D();
-	explicit Entity3D(const std::string& id); /* temporary, waiting for scene manager */
-	~Entity3D();
+	GLCamera();
+	~GLCamera();
 
 public:
-	const std::string& GetID() const;
+	glm::mat4 ViewMatrix() const;
 
+public:
 	const glm::vec3& Position() const;
 	void SetPosition(const glm::vec3& position);
 
@@ -34,18 +31,12 @@ public:
 	const glm::vec3& Acceleration() const;
 	void SetAcceleration(const glm::vec3& acceleration);
 
-	void SetPrimitive(GLPrimitiveT& primitive);
-	void SetPrimitive(GLPrimitiveLibrary& lib, const IdT ID);
-
-public:
-	void Draw();
+	// move camera along target direction
+	void Move(const float movement);
 
 private:
 	glm::vec3 _position;
 	glm::vec3 _rotation;
 	glm::vec3 _acceleration;
-	
-	GLPrimitiveT _primitive;
 
-	std::string _id;
 };

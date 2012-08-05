@@ -7,12 +7,23 @@ Entity3D::Entity3D()
 
 }
 
+Entity3D::Entity3D(const std::string& id)
+	: Entity3D() 
+{
+	_id = id;
+}
+
 Entity3D::~Entity3D()
 {
 
 }
 
-const glm::vec3& Entity3D::Position()
+const std::string& Entity3D::GetID() const
+{
+	return _id;
+}
+
+const glm::vec3& Entity3D::Position() const
 {
 	return _position;
 }
@@ -22,7 +33,7 @@ void Entity3D::SetPosition(const glm::vec3& position)
 	_position = position;
 }
 
-const glm::vec3& Entity3D::Rotation()
+const glm::vec3& Entity3D::Rotation() const
 {
 	return _rotation;
 }
@@ -47,7 +58,7 @@ void Entity3D::SetRotationZ(const float rotation)
 	_rotation.z = rotation;
 }
 
-const glm::vec3& Entity3D::Acceleration()
+const glm::vec3& Entity3D::Acceleration() const
 {
 	return _acceleration;
 }

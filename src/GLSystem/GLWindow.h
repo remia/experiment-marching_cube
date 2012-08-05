@@ -12,7 +12,7 @@ template <typename T,typename WindowSystem>
 class GLWindow : public WindowSystem, public T
 {
 	static_assert(std::is_base_of<GLWindowBase,T>::value, 
-		"GLWindow : 1st template argument must be derived from base class GLWindow");
+		"GLWindow : 1st template argument must be derived from base class GLWindowBase");
 
 public:
 	GLWindow(int argc, char** argv);

@@ -50,3 +50,8 @@ void GLWindowGlut::glutMouseMove(int x, int y)
 	glutPostRedisplay();
 }
 
+void GLWindowGlut::glutKeyboardEvent(unsigned char keys, int x, int y)
+{
+	_keyboardEvent(keys, x, y);
+	glutPostRedisplay();
+}

@@ -4,3 +4,4 @@ Input abstraction : common input layer for all gui subsystems
 3D Mesh loading from file : using c++ lib 'assimp'
 
 GLScene/GLShading : todo
+MarchingCube : mesh creation from lambda potential function

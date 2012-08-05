@@ -1,13 +1,27 @@
-Language:
-C++11
+Proto OpenGL Renderer - Marching Cube
+===============================
 
-Dependencies:
-OpenGL
-Glu
-Glut
-Glew
-GLM
+Build
+-----
 
-Build:
-clear && g++ -std=c++0x main.cpp MarchingCube.cpp ShaderProgram.cpp -o MarchingCube -I/home/rem/glm/glm-0.9.3.4/ -lglut -lGLU -lGLEW && ./MarchingCube 
+C++11, g++4.7 minimum
+cmake 2.6 minimum
 
+### Usage
+cd project_dir
+cmake . -G "Unix Makefiles"
+make -j
+
+Dependencies
+------------
+
+* OpenGL
+* Glu
+* Glew
+* GLM
+* Assimp
+* Freeimageplus
+
+* Glut (optional)
+* SDL (optional)
+* Qt (optional)

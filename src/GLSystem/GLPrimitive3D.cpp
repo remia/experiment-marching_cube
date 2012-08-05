@@ -1,6 +1,7 @@
 #include "GLPrimitive3D.h"
-
 #include "GLUtils.h"
+
+#include <numeric>
 
 GLPrimitive3D::GLPrimitive3D()
 	: _vaoUptoDate(false), _verticesCount(0)
@@ -11,7 +12,10 @@ GLPrimitive3D::GLPrimitive3D()
 
 GLPrimitive3D::~GLPrimitive3D()
 {
-	// TODO : destroy GLBuffers / Arrays
+	for(auto& vbo : _buffers)
+		glDeleteBuffers(1, &vbo.second.handle);
+
+	glDeleteVertexArrays(1, &_vaoHandle);
 }
 
 void GLPrimitive3D::SetPrimitiveType(const GLenum type)
@@ -19,9 +23,9 @@ void GLPrimitive3D::SetPrimitiveType(const GLenum type)
 	_primitiveT = type;
 }
 
-void GLPrimitive3D::SetVerticesCount(const unsigned int count)
+void GLPrimitive3D::BindTexture(const GLTextureT& texture)
 {
-	_verticesCount = count;
+	_textures.push_back(texture);
 }
 
 void GLPrimitive3D::Init()
@@ -38,6 +42,20 @@ void GLPrimitive3D::Init()
 			desc.normalized, desc.stride, (GLubyte*) NULL);
 	}
 
+	// if no indices buffer, generate one
+	if(_indices.size == 0)
+	{
+		std::vector<unsigned int> genIndices(_verticesCount);
+		std::iota(genIndices.begin(), genIndices.end(), 0);
+
+		glGenBuffers(1, &_indices.handle);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indices.handle);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, genIndices.size() * sizeof(unsigned int),
+			genIndices.data(), GL_STATIC_DRAW);
+
+		_indices.size = _verticesCount;
+	}
+
 	_vaoUptoDate = true;
 	GLUtils::CheckErrorAndPrint();
 }
@@ -48,7 +66,8 @@ void GLPrimitive3D::Draw()
 		Init();
 
 	glBindVertexArray(_vaoHandle);
-	glDrawArrays(_primitiveT, 0, _verticesCount);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indices.handle);
+	glDrawElements(_primitiveT, _indices.size, GL_UNSIGNED_INT, 0);
 
 	GLUtils::CheckErrorAndPrint();
 }

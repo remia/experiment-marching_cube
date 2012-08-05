@@ -4,6 +4,7 @@
 #include "GLSystem/GLShaderProgram.h"
 #include "GLSystem/GLPrimitiveLibrary.h"
 #include "GLSystem/Entity3D.h"
+#include "GLSystem/GLCamera.h"
 
 // enable vector.x, .xyz, ... accessing style
 #define GLM_SWIZZLE
@@ -31,7 +32,7 @@ public:
 	// Input event
 	virtual void mouseEvent(int buttons, int state, int x, int y);
 	virtual void mouseMove(int x, int y);
-	virtual void keyboardEvent(int keys, int modifiers) {}
+	virtual void keyboardEvent(unsigned char keys, int x, int y);
 
 private:
 	// used by marching cube initialization
@@ -40,12 +41,11 @@ private:
 private:
 	GLPrimitiveLibrary _primitiveLibrary;
 	std::vector<Entity3D> _actors;
+	GLCamera _camera;
+
 	GLShaderProgram sprog;
 
 	glm::i16vec2 lastMousePos;
-	float xRotate;
-	float yRotate;
-	float zRotate;
 
 	glm::mat4 projectionMatrix;
 };

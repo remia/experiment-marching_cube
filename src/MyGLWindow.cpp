@@ -2,10 +2,11 @@
 #include "MarchingCube.h"
 #include "Utils/Chrono.h"
 
+#include "GLSystem/GLTexture.h"
+
 #include <iostream>
 
 MyGLWindow::MyGLWindow()
-	: xRotate(0), yRotate(0), zRotate(0)
 {
 
 }
@@ -29,9 +30,11 @@ void MyGLWindow::initialize()
 	const int PositionLocation = 0;
 	const int ColorLocation = 1;
 	const int NormalLocation = 2;
+	const int TextureLocation = 3;
 	sprog.BindAttribLocation(PositionLocation, "VertexPosition");
 	sprog.BindAttribLocation(ColorLocation, "VertexColor");
 	sprog.BindAttribLocation(NormalLocation, "VertexNormal");
+	sprog.BindAttribLocation(TextureLocation, "VertexTexCoord");
 
 	std::string linkLog;
 	bool lres = sprog.Link(linkLog);
@@ -111,25 +114,88 @@ void MyGLWindow::initialize()
 		}
 	}
 
+	// load axis
+	float axis_vertices[] = {
+		0.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f
+	};
+
+	float axis_color[] = {
+		0.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 1.0f
+	};
+	
+	unsigned int axis_indices[] = { 0, 1, 0, 2, 0, 3 };
+
+	GLPrimitiveT axis(new GLPrimitive3D);
+	axis->SetBufferData(PositionLocation, axis_vertices, 4 * 3, 3);
+	axis->SetBufferData(ColorLocation, axis_color, 4 * 3, 3);
+	axis->SetIndicesBufferData(axis_indices, 6);
+	axis->SetPrimitiveType(GL_LINES);
+	_primitiveLibrary["origin_axis"] = axis;
+
+	// load scene floor (textured)
+	float floor_vertices[] = {
+		-2.0f, 0.0f, 2.0f,
+		 2.0f, 0.0f, 2.0f,
+		 2.0f, 0.0f,-2.0f,
+		-2.0f, 0.0f,-2.0f
+	};
+
+	float floor_textCoord[] = {
+		0.0f, 0.0f,
+		1.0f, 0.0f,
+		1.0f, 1.0f,
+		0.0f, 1.0f
+	};
+
+	unsigned int floor_indices[] = { 0, 3, 1, 1, 3, 2 };
+
+	GLTextureT floor_texture(new GLTexture);
+	floor_texture->LoadFromFile("./data/texture/BlueMarblePersian-ColorMap.png");
+
+	GLPrimitiveT floor(new GLPrimitive3D);
+	floor->SetBufferData(PositionLocation, floor_vertices, 4 * 3, 3);
+	floor->SetBufferData(TextureLocation, floor_textCoord, 4 * 2, 2);
+	floor->SetIndicesBufferData(floor_indices, 6);
+	floor->SetPrimitiveType(GL_TRIANGLES);
+	floor->BindTexture(floor_texture);
+	_primitiveLibrary["Floor"] = floor;
+
 	// create 3D primitive
 	GLPrimitiveT mesh(new GLPrimitive3D);
 	mesh->SetBufferData(PositionLocation, positionArray, 3);
 	mesh->SetBufferData(NormalLocation, normalArray, 3);
 	mesh->SetPrimitiveType(GL_TRIANGLES);
-	mesh->SetVerticesCount(triangleCount * 3);
-
 	_primitiveLibrary["MCMesh"] = mesh;
 
-	Entity3D e1;
-	e1.SetPrimitive(_primitiveLibrary, "MCMesh");
-	e1.SetPosition( glm::vec3(0.0f, 0.0f, -10.0f) );
+	Entity3D e0("axis");
+	e0.SetPrimitive(_primitiveLibrary, "origin_axis");
+	e0.SetPosition( glm::vec3(0.0f) );
 
-	Entity3D e2;
+	Entity3D e1("mesh");
+	e1.SetPrimitive(_primitiveLibrary, "MCMesh");
+	e1.SetPosition( glm::vec3(0.0f, 0.0f, 10.0f) );
+
+	Entity3D e2("mesh");
 	e2.SetPrimitive(_primitiveLibrary, "MCMesh");
 	e2.SetPosition( glm::vec3(4.0f, 0.0f, -10.0f) );
 	
+	Entity3D e3("floor");
+	e3.SetPrimitive(_primitiveLibrary, "Floor");
+	e3.SetPosition( glm::vec3(0.0f, -2.0f, -10.0f) );
+	
+	_actors.push_back(e0);
 	_actors.push_back(e1);
 	_actors.push_back(e2);
+	_actors.push_back(e3);
+
+	// camera settings
+	_camera.SetPosition( glm::vec3(0.0f, 0.0f, 0.0f) );
 }
 
 void MyGLWindow::resize(int width, int height)
@@ -150,18 +216,11 @@ void MyGLWindow::paint()
 	{
 		// set matrices model view proj
 		glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), e.Position());
-		modelMatrix = glm::rotate(modelMatrix, xRotate / 16.0f, glm::vec3(1.0f, 0.0f, 0.0f));
-		modelMatrix = glm::rotate(modelMatrix, yRotate / 16.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix = glm::rotate(modelMatrix, zRotate / 16.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-
-		glm::mat4 viewMatrix = glm::lookAt(
-			glm::vec3(0.0f, 2.0f, 0.0f),
-			glm::vec3(2.0f, 0.0f, -10.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));
-		
-		glm::mat4 modelViewMatrix = viewMatrix * modelMatrix;	
+		glm::mat4 viewMatrix = _camera.ViewMatrix();
+		glm::mat4 modelViewMatrix = viewMatrix * modelMatrix;
 		glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(modelViewMatrix));
-		glm::mat4 pmvMatrix = projectionMatrix * viewMatrix * modelMatrix;
+		glm::mat4 pmvMatrix = projectionMatrix * viewMatrix;
+		pmvMatrix *= modelMatrix;
 
 		glUniformMatrix4fv(sprog.GetUniformLocation("ProjectionMatrix"),
 			1, GL_FALSE, glm::value_ptr(projectionMatrix));
@@ -176,41 +235,45 @@ void MyGLWindow::paint()
 		struct LightInfo
 		{
 			glm::vec4 Position;	// Light position in eye coords
-			glm::vec3 La;		// Ambient light intensity
-			glm::vec3 Ld;		// Diffuse light intensity
-			glm::vec3 Ls;		// Specular light intensity;
+			glm::vec3 Intensity;// Light intensity (ads)
 		};
 		LightInfo Light;
 		Light.Position = glm::vec4(0.0f, 5.0f, 0.0f, 1.0f);
-		Light.La = glm::vec3(0.1f, 0.1f, 0.7f);
-		Light.Ld = glm::vec3(0.8f, 0.5f, 0.5f);
-		Light.Ls = glm::vec3(1.0f, 1.0f, 1.0f);
+		Light.Intensity = glm::vec3(1.0f, 1.0f, 1.0f);
 
 		struct MaterialInfo
 		{
-			glm::vec3 Ka;			// Ambient reflectivity
-			glm::vec3 Kd;			// Diffuse reflectivity
-			glm::vec3 Ks;			// Specular reflectivity
+			glm::vec3 Ka;		// Ambient reflectivity
+			glm::vec3 Kd;		// Diffuse reflectivity
+			glm::vec3 Ks;		// Specular reflectivity
 			float Shininess;	// Specular shininess factor
 		};
 		MaterialInfo Material;
-		Material.Ka = glm::vec3(0.1f, 0.1f, 0.7f);
-		Material.Kd = glm::vec3(0.2f, 0.2f, 0.2f);
+		Material.Ka = glm::vec3(0.3f, 0.7f, 0.9f);
+		Material.Kd = glm::vec3(0.3f, 0.7f, 0.9f);
 		Material.Ks = glm::vec3(1.0f, 1.0f, 1.0f);
 		Material.Shininess = 30.0f;
 
 		glUniform4fv(sprog.GetUniformLocation("Light.Position"), 1, glm::value_ptr(Light.Position));
-		glUniform3fv(sprog.GetUniformLocation("Light.La"), 1, glm::value_ptr(Light.La));
-		glUniform3fv(sprog.GetUniformLocation("Light.Ld"), 1, glm::value_ptr(Light.Ld));
-		glUniform3fv(sprog.GetUniformLocation("Light.Ls"), 1, glm::value_ptr(Light.Ls));
+		glUniform3fv(sprog.GetUniformLocation("Light.Intensity"), 1, glm::value_ptr(Light.Intensity));
 		
 		glUniform3fv(sprog.GetUniformLocation("Material.Ka"), 1, glm::value_ptr(Material.Ka));
 		glUniform3fv(sprog.GetUniformLocation("Material.Kd"), 1, glm::value_ptr(Material.Kd));
 		glUniform3fv(sprog.GetUniformLocation("Material.Ks"), 1, glm::value_ptr(Material.Ks));
 		glUniform1f(sprog.GetUniformLocation("Material.Shininess"), Material.Shininess);
 
-		GLuint diffuseLocation = sprog.GetSubroutineIndex(GL_VERTEX_SHADER, "diffuseOnly"); // "phongShading");
+		glUniform1i(sprog.GetUniformLocation("Tex1"), 0);
+
+		GLuint diffuseLocation = sprog.GetSubroutineIndex(GL_VERTEX_SHADER, "phongShading");
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &diffuseLocation);
+
+		std::string coloringModel;
+		if(e.GetID() == "floor") coloringModel = "texturedShadingColor";
+		if(e.GetID() == "axis") coloringModel = "solidColor";
+		if(e.GetID() == "mesh") coloringModel = "shadingColor";
+
+		GLuint colorModelLocation = sprog.GetSubroutineIndex(GL_FRAGMENT_SHADER, coloringModel);
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &colorModelLocation);		
 
 		// draw
 		e.Draw();
@@ -235,11 +298,22 @@ void MyGLWindow::mouseMove(int x, int y)
 	int dx = x - lastMousePos.x;
 	int dy = y - lastMousePos.y;
 
-	xRotate += dy * 8;
-	yRotate += dx * 8;
+	_camera.SetRotationX(_camera.Rotation().x - dy * 8);
+	_camera.SetRotationY(_camera.Rotation().y - dx * 8);
 
 	lastMousePos.x = x;
 	lastMousePos.y = y;
+}
+
+void MyGLWindow::keyboardEvent(unsigned char keys, int x, int y)
+{
+	glm::vec3 pos = _camera.Position();
+	const float speed = 4.0f;
+
+	if(keys == 'z')
+		_camera.Move(-0.1f * speed);
+	if(keys == 's')
+		_camera.Move(0.1f * speed);
 }
 
 // used by marching cube initialization
