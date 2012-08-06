@@ -1,6 +1,7 @@
 #include "MyGLWindow.h"
 #include "MarchingCube.h"
 #include "Utils/Chrono.h"
+#include "Utils/PerlinNoise.h"
 
 #include "GLSystem/GLTexture.h"
 
@@ -52,7 +53,7 @@ void MyGLWindow::initialize()
 	chrono.start();
 
 	// initialize marching cube
-	float minValue = 0; //1.8f;
+	float minValue = 0.5f;
 
 	float minX, maxX;
 	float minY, maxY;
@@ -66,6 +67,9 @@ void MyGLWindow::initialize()
 	std::vector<glm::vec4> mcPoints((nX + 1) * (nY + 1) * (nZ + 1));
 	glm::vec3 mcStep((maxX - minX) / nX, (maxY - minY) / nY, (maxZ - minZ) / nZ);
 
+	PerlinNoise perlin( time(NULL) );
+
+	#pragma omp parallel for
 	for(int x = 0; x < nX + 1; ++x)
 		for(int y = 0; y < nY + 1; ++y)
 			for(int z = 0; z < nZ + 1; ++z)
@@ -74,8 +78,23 @@ void MyGLWindow::initialize()
 					minX + x * mcStep.x,
 					minY + y * mcStep.y,
 					minZ + z * mcStep.z, 0);
-			
-				point.w = Potential(point.x, point.y, point.z);
+
+				float freq = 0.15f;
+				float amp = 0.5f;
+				float sum = 0.0f;
+				float lacunarity = 1.2f;
+				float gain = 0.5f;
+				float octaves = 2.0f;
+				
+				for(int i = 0; i < octaves; ++i)
+				{
+					sum += perlin.Noise(point.x * freq, point.y * freq, point.z * freq) * amp;
+					freq *= lacunarity;
+					amp * gain;
+				}
+				point.w = sum;
+				
+				//point.w = Potential(point.x, point.y, point.z);
 				mcPoints[x * (nY + 1) * (nZ + 1) + y * (nZ + 1) + z] = point;
 			}
 

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(MarchingCube)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -g")
+set(CMAKE_CXX_FLAGS "-std=c++0x -g -fopenmp -O3")
 
 set(SDL_BUILDING_LIBRARY true)
 Find_Package(SDL REQUIRED)
@@ -21,6 +21,7 @@ set(source_files
 	src/MyGLWindow.cpp
 	src/MarchingCube.cpp
 	src/Utils/Chrono.cpp
+	src/Utils/PerlinNoise.cpp
 	src/GLSystem/GLContext.cpp
 	src/GLSystem/GLShaderProgram.cpp
 	src/GLSystem/GLPrimitive3D.cpp
