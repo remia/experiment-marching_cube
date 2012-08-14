@@ -4,8 +4,13 @@
 #include "Utils/PerlinNoise.h"
 
 #include "GLSystem/GLTexture.h"
+#include "GLSystem/GLModel.h"
+#include "GLSystem/GLPrimitive3D.h"
 
 #include <iostream>
+
+// no input abstraction implemented
+#include <GL/glut.h>
 
 MyGLWindow::MyGLWindow()
 {
@@ -53,16 +58,16 @@ void MyGLWindow::initialize()
 	chrono.start();
 
 	// initialize marching cube
-	float minValue = 0.5f;
+	float minValue = 0; //0.5f;
 
 	float minX, maxX;
 	float minY, maxY;
 	float minZ, maxZ;
-	minX = minY = minZ = -8.0f;
-	maxX = maxY = maxZ = 8.0f;
+	minX = minY = minZ = -1.5f;
+	maxX = maxY = maxZ = 1.5f;
 
 	unsigned int nX, nY, nZ;
-	nX = nY = nZ = 100;
+	nX = nY = 50; nZ = 50; // 700, 700, 400 => OK
 
 	std::vector<glm::vec4> mcPoints((nX + 1) * (nY + 1) * (nZ + 1));
 	glm::vec3 mcStep((maxX - minX) / nX, (maxY - minY) / nY, (maxZ - minZ) / nZ);
@@ -79,22 +84,26 @@ void MyGLWindow::initialize()
 					minY + y * mcStep.y,
 					minZ + z * mcStep.z, 0);
 
-				float freq = 0.15f;
-				float amp = 0.5f;
+				// test terrain	
+				point.w = -point.y;
+
+				float freq = 11.03f;
+				float amp = 0.25f;
 				float sum = 0.0f;
-				float lacunarity = 1.2f;
-				float gain = 0.5f;
-				float octaves = 2.0f;
+				float lacunarity = 0.198f;
+				float gain = 2.0f;
+				unsigned int octaves = 9;
 				
-				for(int i = 0; i < octaves; ++i)
+				for(unsigned int i = 0; i < octaves; ++i)
 				{
 					sum += perlin.Noise(point.x * freq, point.y * freq, point.z * freq) * amp;
 					freq *= lacunarity;
 					amp * gain;
 				}
-				point.w = sum;
+
+				point.w += sum;
 				
-				//point.w = Potential(point.x, point.y, point.z);
+				//point.w = Potential(point.x, point.y, point.z);				
 				mcPoints[x * (nY + 1) * (nZ + 1) + y * (nZ + 1) + z] = point;
 			}
 
@@ -150,12 +159,12 @@ void MyGLWindow::initialize()
 	
 	unsigned int axis_indices[] = { 0, 1, 0, 2, 0, 3 };
 
-	GLPrimitiveT axis(new GLPrimitive3D);
+	GLPrimitive3D* axis(new GLPrimitive3D);
 	axis->SetBufferData(PositionLocation, axis_vertices, 4 * 3, 3);
 	axis->SetBufferData(ColorLocation, axis_color, 4 * 3, 3);
 	axis->SetIndicesBufferData(axis_indices, 6);
 	axis->SetPrimitiveType(GL_LINES);
-	_primitiveLibrary["origin_axis"] = axis;
+	_primitiveLibrary["origin_axis"] = GLEntityT(axis);
 
 	// load scene floor (textured)
 	float floor_vertices[] = {
@@ -177,20 +186,31 @@ void MyGLWindow::initialize()
 	GLTextureT floor_texture(new GLTexture);
 	floor_texture->LoadFromFile("./data/texture/BlueMarblePersian-ColorMap.png");
 
-	GLPrimitiveT floor(new GLPrimitive3D);
+	GLPrimitive3D* floor(new GLPrimitive3D);
 	floor->SetBufferData(PositionLocation, floor_vertices, 4 * 3, 3);
 	floor->SetBufferData(TextureLocation, floor_textCoord, 4 * 2, 2);
 	floor->SetIndicesBufferData(floor_indices, 6);
 	floor->SetPrimitiveType(GL_TRIANGLES);
 	floor->BindTexture(floor_texture);
-	_primitiveLibrary["Floor"] = floor;
+	_primitiveLibrary["Floor"] = GLEntityT(floor);
 
-	// create 3D primitive
-	GLPrimitiveT mesh(new GLPrimitive3D);
+	// create 3D primitive from marching cube
+	GLPrimitive3D* mesh(new GLPrimitive3D);
 	mesh->SetBufferData(PositionLocation, positionArray, 3);
 	mesh->SetBufferData(NormalLocation, normalArray, 3);
 	mesh->SetPrimitiveType(GL_TRIANGLES);
-	_primitiveLibrary["MCMesh"] = mesh;
+	_primitiveLibrary["MCMesh"] = GLEntityT(mesh);
+
+	// load mesh
+	chrono.start();
+	GLEntityT tank(new GLModel("./data/model/stankbot/models/stankbot.dae"));
+	_primitiveLibrary["Tank"] = tank;
+	std::cout << "Load stankbot (ms) : " << chrono.ellapsed() << std::endl;
+
+	chrono.start();
+	GLEntityT dragon(new GLModel("./data/model/dragon_vrip.ply"));
+	_primitiveLibrary["Dragon"] = dragon;
+	std::cout << "Load dragon (ms) : " << chrono.ellapsed() << std::endl;
 
 	Entity3D e0("axis");
 	e0.SetPrimitive(_primitiveLibrary, "origin_axis");
@@ -203,15 +223,28 @@ void MyGLWindow::initialize()
 	Entity3D e2("mesh");
 	e2.SetPrimitive(_primitiveLibrary, "MCMesh");
 	e2.SetPosition( glm::vec3(4.0f, 0.0f, -10.0f) );
+	e2.SetScale( glm::vec3(10.0f, 10.0f, 10.0f) );
 	
 	Entity3D e3("floor");
 	e3.SetPrimitive(_primitiveLibrary, "Floor");
 	e3.SetPosition( glm::vec3(0.0f, -2.0f, -10.0f) );
 	
+	Entity3D e4("tank");
+	e4.SetPrimitive(_primitiveLibrary, "Tank");
+	e4.SetPosition( glm::vec3(0.0f, 2.0f, 0.0f) );
+	e4.SetScale( glm::vec3(0.01f, 0.01f, 0.01f) );
+
+	Entity3D e5("dragon");
+	e5.SetPrimitive(_primitiveLibrary, "Dragon");
+	e5.SetPosition( glm::vec3(0.0f, 2.0f, 0.0f) );
+	e5.SetScale( glm::vec3(10.0f, 10.0f, 10.0f) );
+
 	_actors.push_back(e0);
 	_actors.push_back(e1);
-	_actors.push_back(e2);
+	//_actors.push_back(e2);
 	_actors.push_back(e3);
+	_actors.push_back(e4);
+	_actors.push_back(e5);
 
 	// camera settings
 	_camera.SetPosition( glm::vec3(0.0f, 0.0f, 0.0f) );
@@ -231,16 +264,24 @@ void MyGLWindow::paint()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0, 0, 0, 0);
 
+	// draw wireframe
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	for(Entity3D e : _actors)
 	{
 		// set matrices model view proj
 		glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), e.Position());
+		modelMatrix = glm::scale(modelMatrix, e.Scale());
+
 		glm::mat4 viewMatrix = _camera.ViewMatrix();
 		glm::mat4 modelViewMatrix = viewMatrix * modelMatrix;
 		glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(modelViewMatrix));
+
 		glm::mat4 pmvMatrix = projectionMatrix * viewMatrix;
 		pmvMatrix *= modelMatrix;
 
+		glUniformMatrix4fv(sprog.GetUniformLocation("ViewMatrix"),
+			1, GL_FALSE, glm::value_ptr(viewMatrix));
 		glUniformMatrix4fv(sprog.GetUniformLocation("ProjectionMatrix"),
 			1, GL_FALSE, glm::value_ptr(projectionMatrix));
 		glUniformMatrix3fv(sprog.GetUniformLocation("NormalMatrix"),
@@ -259,6 +300,7 @@ void MyGLWindow::paint()
 		LightInfo Light;
 		Light.Position = glm::vec4(0.0f, 5.0f, 0.0f, 1.0f);
 		Light.Intensity = glm::vec3(1.0f, 1.0f, 1.0f);
+		Light.Position = glm::vec4(0.0f, 8.0f, -10.0f, 1.0f);
 
 		struct MaterialInfo
 		{
@@ -286,13 +328,16 @@ void MyGLWindow::paint()
 		GLuint diffuseLocation = sprog.GetSubroutineIndex(GL_VERTEX_SHADER, "phongShading");
 		glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &diffuseLocation);
 
-		std::string coloringModel;
+		std::string coloringModel("shadingColor"); // default value
 		if(e.GetID() == "floor") coloringModel = "texturedShadingColor";
 		if(e.GetID() == "axis") coloringModel = "solidColor";
 		if(e.GetID() == "mesh") coloringModel = "shadingColor";
 
 		GLuint colorModelLocation = sprog.GetSubroutineIndex(GL_FRAGMENT_SHADER, coloringModel);
-		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &colorModelLocation);		
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &colorModelLocation);
+
+		// check errors
+		GLUtils::CheckErrorAndPrint("Before drawing");
 
 		// draw
 		e.Draw();
@@ -301,8 +346,6 @@ void MyGLWindow::paint()
 	glFlush();
 }
 
-// no input abstraction implemented
-#include <GL/glut.h>
 void MyGLWindow::mouseEvent(int buttons, int state, int x, int y)
 {
 	if( buttons == GLUT_LEFT_BUTTON)

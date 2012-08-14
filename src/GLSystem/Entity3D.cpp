@@ -2,7 +2,7 @@
 
 Entity3D::Entity3D()
 	: _position(0.0f, 0.0f, 0.0f), _rotation(0.0f, 0.0f, 0.0f),
-	_acceleration(0.0f, 0.0f, 0.0f)
+	_acceleration(0.0f, 0.0f, 0.0f), _scale(1.0f, 1.0f, 1.0f)
 {
 
 }
@@ -68,7 +68,17 @@ void Entity3D::SetAcceleration(const glm::vec3& acceleration)
 	_acceleration = acceleration;
 }
 
-void Entity3D::SetPrimitive(GLPrimitiveT& primitive)
+const glm::vec3& Entity3D::Scale() const
+{
+	return _scale;
+}
+
+void Entity3D::SetScale(const glm::vec3& scale)
+{
+	_scale = scale;
+}
+
+void Entity3D::SetPrimitive(GLEntityT& primitive)
 {
 	_primitive = primitive;
 }

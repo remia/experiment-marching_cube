@@ -3,19 +3,21 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
+#include "GLDrawable.h"
 #include "GLTextureLibrary.h"
 
 #include <vector>
 #include <map>
 #include <string>
 
-class GLPrimitive3D
+class GLPrimitive3D : public GLDrawable
 {
 public:
 	GLPrimitive3D();
 	~GLPrimitive3D();
 
-	static GLPrimitive3D FromFile();
+	GLPrimitive3D(const GLPrimitive3D& rhs) = delete;
+	GLPrimitive3D& operator=(const GLPrimitive3D& rhs) = delete;
 
 public:
 	template <typename T>
@@ -38,7 +40,7 @@ public:
 
 public:
 	void Init();
-	void Draw();
+	virtual void Draw();
 
 private:
 	struct VBODesc

@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-void GLUtils::CheckErrorAndPrint()
+void GLUtils::CheckErrorAndPrint(const std::string& message)
 {
 	GLenum errCode;
 	const GLubyte *errString;
@@ -13,6 +13,7 @@ void GLUtils::CheckErrorAndPrint()
 	if ((errCode = glGetError()) != GL_NO_ERROR)
 	{
 		errString = gluErrorString(errCode);
+		std::cerr << message << std::endl;
 		std::cerr << "OpenGL Error : " << errString << std::endl;
 	}
 }

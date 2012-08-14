@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(MarchingCube)
 
-set(CMAKE_CXX_FLAGS "-std=c++0x -g -fopenmp -O3")
+set(CMAKE_CXX_FLAGS "-std=c++0x -fopenmp -O3")
 
 set(SDL_BUILDING_LIBRARY true)
 Find_Package(SDL REQUIRED)
@@ -25,6 +25,7 @@ set(source_files
 	src/GLSystem/GLContext.cpp
 	src/GLSystem/GLShaderProgram.cpp
 	src/GLSystem/GLPrimitive3D.cpp
+	src/GLSystem/GLModel.cpp
 	src/GLSystem/GLTexture.cpp
 	src/GLSystem/Entity3D.cpp
 	src/GLSystem/GLCamera.cpp

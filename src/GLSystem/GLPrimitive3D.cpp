@@ -31,12 +31,10 @@ void GLPrimitive3D::BindTexture(const GLTextureT& texture)
 void GLPrimitive3D::Init()
 {
 	glBindVertexArray(_vaoHandle);
-
 	for(auto bufferEntry : _buffers)
 	{
 		const VBODesc& desc = bufferEntry.second;
 		glEnableVertexAttribArray(desc.location);
-
 		glBindBuffer(GL_ARRAY_BUFFER, desc.handle);
 		glVertexAttribPointer(desc.location, desc.componentSize, GL_FLOAT,
 			desc.normalized, desc.stride, (GLubyte*) NULL);
@@ -57,7 +55,7 @@ void GLPrimitive3D::Init()
 	}
 
 	_vaoUptoDate = true;
-	GLUtils::CheckErrorAndPrint();
+	GLUtils::CheckErrorAndPrint("Init");
 }
 
 void GLPrimitive3D::Draw()
@@ -68,6 +66,7 @@ void GLPrimitive3D::Draw()
 	glBindVertexArray(_vaoHandle);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indices.handle);
 	glDrawElements(_primitiveT, _indices.size, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 
-	GLUtils::CheckErrorAndPrint();
+	GLUtils::CheckErrorAndPrint("GLPrimitive3D::Draw");
 }

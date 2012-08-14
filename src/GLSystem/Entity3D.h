@@ -34,7 +34,10 @@ public:
 	const glm::vec3& Acceleration() const;
 	void SetAcceleration(const glm::vec3& acceleration);
 
-	void SetPrimitive(GLPrimitiveT& primitive);
+	const glm::vec3& Scale() const;
+	void SetScale(const glm::vec3& scale);
+
+	void SetPrimitive(GLEntityT& primitive);
 	void SetPrimitive(GLPrimitiveLibrary& lib, const IdT ID);
 
 public:
@@ -44,8 +47,9 @@ private:
 	glm::vec3 _position;
 	glm::vec3 _rotation;
 	glm::vec3 _acceleration;
+	glm::vec3 _scale;
 	
-	GLPrimitiveT _primitive;
+	GLEntityT _primitive;
 
 	std::string _id;
 };

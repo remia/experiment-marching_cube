@@ -76,8 +76,8 @@ double PerlinNoise::Noise(double x, double y, double z)
                                    grad(_p[BA+1], x-1, y  , z-1 )),
                            lerp(u, grad(_p[AB+1], x  , y-1, z-1 ),
                                    grad(_p[BB+1], x-1, y-1, z-1 ))));
-	// scale between [0-1]
-	return ( result + 1.0 ) / 2.0;
+	// result between [-1, 1] ( TODO : confirmation )
+	return result;
 }
 
 double PerlinNoise::fade(double t)

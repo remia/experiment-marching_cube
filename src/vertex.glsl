@@ -29,6 +29,7 @@ struct MaterialInfo
 uniform MaterialInfo Material;
 
 uniform mat4 ModelViewMatrix;
+uniform mat4 ViewMatrix;
 uniform mat3 NormalMatrix;
 uniform mat4 ProjectionMatrix;
 uniform mat4 MVP;
@@ -42,14 +43,16 @@ void getEyeSpace(out vec3 normal, out vec4 position)
 subroutine(shadeModelType)
 vec3 diffuseOnly(vec4 position, vec3 normal)
 {
-	vec3 s = normalize( vec3(Light.Position - position) );
+	vec4 lv = ViewMatrix * Light.Position;
+	vec3 s = normalize( vec3(lv - position) );
 	return Light.Intensity * Material.Kd * max( dot(s, normal), 0.0);
 }
 
 subroutine(shadeModelType)
 vec3 phongShading(vec4 position, vec3 normal)
 {
-	vec3 s = normalize( vec3(Light.Position - position) );
+	vec4 lv = ViewMatrix * Light.Position;
+	vec3 s = normalize( vec3(lv - position) );
 	vec3 v = normalize(-position.xyz);
 	vec3 r = reflect(-s, normal);
 	
@@ -73,7 +76,7 @@ void main()
 	getEyeSpace(eyeNormal, eyePosition);
  
 	// Light according to subroutine uniform value
-	LightIntensity = shadeModel(eyePosition, eyeNormal);
+	LightIntensity = shadeModel(eyePosition, eyeNormal);// * vec3(1.0, 1.0, VertexPosition.y * 11.0);
 
 	Color = VertexColor;
 	TexCoord = VertexTexCoord;

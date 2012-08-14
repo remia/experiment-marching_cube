@@ -23,6 +23,6 @@ Dependencies
 * GLM
 * Assimp
 * Freeimageplus
-* Glut (optional)
+* FreeGlut (optional)
 * SDL (optional)
 * Qt (optional)

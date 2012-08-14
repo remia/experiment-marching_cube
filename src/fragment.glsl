@@ -33,4 +33,10 @@ vec4 texturedShadingColor()
 void main()
 {
 	FragColor = colorModel();
+	//float a = (LightIntensity.x);
+	//float b = (LightIntensity.y);
+	//float c = (LightIntensity.z);
+	//FragColor = vec4(a, 0, 0, 1.0);
 }
+
+
