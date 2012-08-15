@@ -22,16 +22,19 @@ set(source_files
 	src/MarchingCube.cpp
 	src/Utils/Chrono.cpp
 	src/Utils/PerlinNoise.cpp
-	src/GLSystem/GLContext.cpp
-	src/GLSystem/GLShaderProgram.cpp
-	src/GLSystem/GLPrimitive3D.cpp
-	src/GLSystem/GLModel.cpp
-	src/GLSystem/GLTexture.cpp
-	src/GLSystem/Entity3D.cpp
-	src/GLSystem/GLCamera.cpp
-	src/GLSystem/GLUtils.cpp
-	src/GLSystem/Glut/GLWindowGlut.cpp
-	src/GLSystem/SDL/GLWindowSDL.cpp
+	src/GLRenderer/Utils.cpp
+	src/GLRenderer/Context.cpp
+	src/GLRenderer/Camera.cpp
+	src/GLRenderer/Texture.cpp
+	src/GLRenderer/Mesh.cpp
+	src/GLRenderer/Material.cpp
+	src/GLRenderer/Actor.cpp
+	src/GLRenderer/Entity.cpp
+	src/GLRenderer/Scene.cpp
+	src/GLRenderer/ShaderProgram.cpp
+	src/GLRenderer/ModelLoader.cpp
+	src/GLRenderer/Glut/WindowGlut.cpp
+	src/GLRenderer/SDL/WindowSDL.cpp
 )
 
 add_executable(

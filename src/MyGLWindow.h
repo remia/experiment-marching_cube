@@ -1,10 +1,8 @@
 #pragma once
 
-#include "GLSystem/GLWindowBase.h"
-#include "GLSystem/GLShaderProgram.h"
-#include "GLSystem/GLPrimitiveLibrary.h"
-#include "GLSystem/Entity3D.h"
-#include "GLSystem/GLCamera.h"
+#include "GLRenderer/WindowBase.h"
+#include "GLRenderer/AssetLib.h"
+#include "GLRenderer/Scene.h"
 
 // enable vector.x, .xyz, ... accessing style
 #define GLM_SWIZZLE
@@ -17,7 +15,7 @@
 #include <vector>
 
 // Custom class : have to define initialize, resize & paint
-class MyGLWindow : public GLWindowBase
+class MyGLWindow : public GLRenderer::WindowBase
 {
 public:
 	MyGLWindow();
@@ -35,17 +33,21 @@ public:
 	virtual void keyboardEvent(unsigned char keys, int x, int y);
 
 private:
+	void InitMCMesh();
+	void InitAxis();
+	void InitFloor();
+	void InitModels();
+
 	// used by marching cube initialization
 	float Potential(const float x, const float y, const float z);
 
 private:
-	GLPrimitiveLibrary _primitiveLibrary;
-	std::vector<Entity3D> _actors;
-	GLCamera _camera;
+	GLRenderer::ActorLib _actorLib;
+	GLRenderer::MeshLib _meshLib;
+	GLRenderer::TextureLib _textureLib;
+	GLRenderer::ShaderProgramLib _shaderProgLib;
 
-	GLShaderProgram sprog;
+	GLRenderer::Scene _scene;
 
 	glm::i16vec2 lastMousePos;
-
-	glm::mat4 projectionMatrix;
 };

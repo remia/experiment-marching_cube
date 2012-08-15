@@ -3,10 +3,10 @@
 subroutine vec3 shadeModelType(vec4 position, vec3 normal);
 subroutine uniform shadeModelType shadeModel;
 
-in vec3 VertexPosition;
-in vec3 VertexColor;
-in vec3 VertexNormal;
-in vec2 VertexTexCoord;
+layout (location = 0) in vec3 VertexPosition;
+layout (location = 1) in vec3 VertexColor;
+layout (location = 2) in vec3 VertexNormal;
+layout (location = 3) in vec2 VertexTexCoord;
 
 out vec3 LightIntensity;
 out vec3 Color;
@@ -28,10 +28,13 @@ struct MaterialInfo
 };
 uniform MaterialInfo Material;
 
-uniform mat4 ModelViewMatrix;
-uniform mat4 ViewMatrix;
+layout (std140) uniform GlobalMatrices
+{
+	mat4 ViewMatrix;
+};
+
 uniform mat3 NormalMatrix;
-uniform mat4 ProjectionMatrix;
+uniform mat4 ModelViewMatrix;
 uniform mat4 MVP;
 
 void getEyeSpace(out vec3 normal, out vec4 position)
@@ -41,7 +44,13 @@ void getEyeSpace(out vec3 normal, out vec4 position)
 }
 
 subroutine(shadeModelType)
-vec3 diffuseOnly(vec4 position, vec3 normal)
+vec3 ShadingSolid(vec4 position, vec3 normal)
+{
+	return Light.Intensity;
+}
+
+subroutine(shadeModelType)
+vec3 ShadingDiffuse(vec4 position, vec3 normal)
 {
 	vec4 lv = ViewMatrix * Light.Position;
 	vec3 s = normalize( vec3(lv - position) );
@@ -49,7 +58,7 @@ vec3 diffuseOnly(vec4 position, vec3 normal)
 }
 
 subroutine(shadeModelType)
-vec3 phongShading(vec4 position, vec3 normal)
+vec3 ShadingADS(vec4 position, vec3 normal)
 {
 	vec4 lv = ViewMatrix * Light.Position;
 	vec3 s = normalize( vec3(lv - position) );

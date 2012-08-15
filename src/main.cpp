@@ -1,12 +1,12 @@
-#include "GLSystem/Glut/GLWindowGlut.h"
-//#include "GLSystem/SDL/GLWindowSDL.h"
-//#include "GLSystem/Qt/GLWindowQt.hpp"
+#include "GLRenderer/Glut/WindowGlut.h"
+//#include "GLRenderer/SDL/WindowSDL.h"
+//#include "GLRenderer/Qt/WindowQt.hpp"
 
 #include "MyGLWindow.h"
 
 int main(int argc, char** argv)
 {
-	GLWindow<MyGLWindow, GLWindowGlut> win(argc, argv);
+	GLRenderer::Window<MyGLWindow, GLRenderer::WindowGlut> win(argc, argv);
 	win.initWindow(500, 500);
 	win.run();
 

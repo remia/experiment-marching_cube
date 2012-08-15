@@ -12,19 +12,19 @@ subroutine uniform ColoringType colorModel;
 uniform sampler2D Tex1;
 
 subroutine(ColoringType)
-vec4 solidColor()
+vec4 PlainColor()
 {
 	return vec4(Color, 1.0);
 }
 
 subroutine(ColoringType)
-vec4 shadingColor()
+vec4 ShadeColor()
 {
 	return vec4(LightIntensity, 1.0);
 }
 
 subroutine(ColoringType)
-vec4 texturedShadingColor()
+vec4 ShadeTexColor()
 {
 	vec4 texColor = texture(Tex1, TexCoord);
 	return texColor * vec4(LightIntensity, 1.0);
